@@ -176,9 +176,9 @@ describe("Team instructions", () => {
       });
 
     const user = await program.account.user.fetch(userPDA);
-    expect(Number(BigInt(user.balance.toNumber()))).to.greaterThan(0 * Math.pow(10, 6));
-  
-      
+    expect(Number(BigInt(user.balance.toNumber()))).to.greaterThan(
+      0 * Math.pow(10, 6)
+    );
   });
 
   it("claims", async () => {
@@ -210,6 +210,46 @@ describe("Team instructions", () => {
       .accountsPartial({
         signer: ownerKeypair.publicKey,
         team: teamPDA,
+        teamMember: teamMemberPDA,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const teamMember = await program.account.teamMember.fetchNullable(
+      teamMemberPDA
+    );
+    expect(teamMember).to.be.null;
+  });
+
+  it("leaves team", async () => {
+    await program.methods
+      .addMember({
+        userId: new anchor.BN(userId),
+        teamId: new anchor.BN(teamId),
+        intialPay: new anchor.BN(0 * Math.pow(10, 6)),
+      })
+      .signers([ownerKeypair])
+      .accountsPartial({
+        signer: ownerKeypair.publicKey,
+        team: teamPDA,
+        teamMember: teamMemberPDA,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    await program.methods
+      .leaveTeam({
+        teamId: new anchor.BN(teamId),
+        userId: new anchor.BN(userId),
+      })
+      .signers([userKeypair])
+      .accountsPartial({
+        signer: userKeypair.publicKey,
+        user: userPDA,
         teamMember: teamMemberPDA,
       })
       .rpc()

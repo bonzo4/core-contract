@@ -12,11 +12,11 @@ pub struct PayMemberOptions {
 
 pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<()> {
     let signer = &mut ctx.accounts.signer;
+    let team = &mut ctx.accounts.team;
 
-    require!(is_program_manager(signer.key()), CoreContractErrors::NotAuthorized);
+    require!(is_program_manager(signer.key()) || team.is_owner(signer.key()), CoreContractErrors::NotAuthorized);
     
     let user = &mut ctx.accounts.user;
-    let team = &mut ctx.accounts.team;
     let team_member = &mut ctx.accounts.team_member;
     let user_vault = &mut ctx.accounts.user_vault;
     let team_vault = &mut ctx.accounts.team_vault;
@@ -65,7 +65,9 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
 pub struct PayMember<'info> {
     #[account(
         mut,
-        constraint = signer.key().to_string() == "2Xv68eQ72VpvC5J52deTYE8Ch8LYjJC1WKBtmSgistTS",
+        constraint = 
+            signer.key().to_string() == "2Xv68eQ72VpvC5J52deTYE8Ch8LYjJC1WKBtmSgistTS"
+            || signer.key() == team.owner,
     )]
     pub signer: Signer<'info>,
     #[account(
