@@ -22,7 +22,10 @@ pub fn leave_team(ctx: Context<LeaveTeam>, _options: LeaveTeamOptions) -> Result
 #[derive(Accounts)]
 #[instruction(options: LeaveTeamOptions)]
 pub struct LeaveTeam<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = signer.key() == user.authority,
+    )]
     pub signer: Signer<'info>,
     #[account(
         mut,

@@ -28,7 +28,7 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
         pay = options.amount.unwrap();
     }
 
-    require!(team.balance > pay, CoreContractErrors::BalanceTooLow);
+    require!(team.balance >= pay, CoreContractErrors::BalanceTooLow);
 
     let cpi_accounts = TransferChecked {
         from: team_vault.to_account_info(),
@@ -37,7 +37,7 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
         mint: usdc_mint.to_account_info(),
     };
     
-    let bump = ctx.bumps.user;
+    let bump = ctx.bumps.team;
     let seeds = vec![bump];
     let binding = options.team_id.to_string();
     let seeds = vec![b"team".as_ref(), binding.as_ref(), seeds.as_slice()];

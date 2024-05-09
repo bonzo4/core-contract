@@ -29,7 +29,10 @@ pub fn add_member(ctx: Context<AddMember>, options: AddMemberOptions) -> Result<
 #[derive(Accounts)]
 #[instruction(options: AddMemberOptions)]
 pub struct AddMember<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = signer.key() == team.owner,
+    )]
     pub signer: Signer<'info>,
     #[account(
         mut,

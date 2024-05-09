@@ -1,7 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { getProgram } from "./utils/program";
-import { getOwnerKeypair, getUserKeypair } from "./utils/wallets";
+import {
+  getManagerKeypair,
+  getOwnerKeypair,
+  getUserKeypair,
+} from "./utils/wallets";
 import { expect } from "chai";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
@@ -40,14 +44,35 @@ describe("Team instructions", () => {
     program.programId
   );
 
+  const managerKey = getManagerKeypair();
+
+  const teamId = 1;
+
+  const [teamPDA] = PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("team"),
+      anchor.utils.bytes.utf8.encode(teamId.toString()),
+    ],
+    program.programId
+  );
+
+  const [teamMemberPDA] = PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("team_member"),
+      anchor.utils.bytes.utf8.encode(teamId.toString()),
+      anchor.utils.bytes.utf8.encode(userId.toString()),
+    ],
+    program.programId
+  );
+
   it("init team", async () => {
     // Add your test here.
     const tx = await program.methods
-      .initUser(new anchor.BN(ownerId))
+      .initTeam(new anchor.BN(teamId))
       .signers([ownerKeypair])
       .accountsPartial({
         signer: ownerKeypair.publicKey,
-        user: ownerPDA,
+        team: teamPDA,
         usdcMint,
       })
       .rpc()
@@ -55,63 +80,69 @@ describe("Team instructions", () => {
         console.log(e);
       });
 
-    const owner = await program.account.user.fetch(ownerPDA);
+    const team = await program.account.team.fetch(teamPDA);
 
-    expect(Number(BigInt(owner.balance.toNumber()))).to.equal(0);
+    expect(Number(BigInt(team.balance.toNumber()))).to.equal(0);
   });
 
-  it("init user", async () => {
+  it("add member", async () => {
     await program.methods
-      .initUser(new anchor.BN(userId))
-      .signers([userKeypair])
-      .accountsPartial({
-        signer: userKeypair.publicKey,
-        user: userPDA,
-        usdcMint,
-      })
-      .rpc()
-      .catch((e) => {
-        console.log(e);
-      });
-
-    const user = await program.account.user.fetch(userPDA);
-
-    expect(Number(BigInt(user.balance.toNumber()))).to.equal(0);
-  });
-
-  it("edits user", async () => {
-    await program.methods
-      .editUser({
+      .addMember({
         userId: new anchor.BN(userId),
-        newAuthority: userKeypair.publicKey,
+        teamId: new anchor.BN(teamId),
+        intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
       .signers([ownerKeypair])
       .accountsPartial({
         signer: ownerKeypair.publicKey,
-        user: userPDA,
+        team: teamPDA,
+        teamMember: teamMemberPDA,
       })
       .rpc()
       .catch((e) => {
         console.log(e);
       });
 
-    const user = await program.account.user.fetch(userPDA);
+    const teamMember = await program.account.teamMember.fetch(teamMemberPDA);
 
-    expect(user.authority.toBase58()).to.equal(
-      userKeypair.publicKey.toBase58()
+    expect(Number(BigInt(teamMember.pay.toNumber()))).to.equal(0);
+  });
+
+  it("edits member", async () => {
+    await program.methods
+      .editMember({
+        userId: new anchor.BN(userId),
+        teamId: new anchor.BN(teamId),
+        pay: new anchor.BN(1 * Math.pow(10, 6)),
+      })
+      .signers([ownerKeypair])
+      .accountsPartial({
+        signer: ownerKeypair.publicKey,
+        team: teamPDA,
+        teamMember: teamMemberPDA,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const teamMember = await program.account.teamMember.fetch(teamMemberPDA);
+
+    expect(Number(BigInt(teamMember.pay.toNumber()))).to.equal(
+      1 * Math.pow(10, 6)
     );
   });
 
-  it("pays user", async () => {
+  it("pays team", async () => {
     await program.methods
-      .payUser({
-        userId: new anchor.BN(userId),
+      .payTeam({
+        teamId: new anchor.BN(userId),
         amount: new anchor.BN(1 * Math.pow(10, 6)),
       })
       .signers([ownerKeypair])
       .accountsPartial({
         signer: ownerKeypair.publicKey,
-        user: userPDA,
+        team: teamPDA,
         usdcMint,
         usdcPayerAccount: ownerUsdcAccount,
       })
@@ -120,8 +151,34 @@ describe("Team instructions", () => {
         console.log(e);
       });
 
+    const team = await program.account.team.fetch(teamPDA);
+    expect(Number(BigInt(team.balance.toNumber()))).to.greaterThan(0);
+  });
+
+  it("pays member", async () => {
+    await program.methods
+      .payMember({
+        teamId: new anchor.BN(userId),
+        userId: new anchor.BN(userId),
+        amount: null,
+      })
+      .signers([managerKey])
+      .accountsPartial({
+        signer: managerKey.publicKey,
+        user: userPDA,
+        team: teamPDA,
+        teamMember: teamMemberPDA,
+        usdcMint,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
     const user = await program.account.user.fetch(userPDA);
-    expect(Number(BigInt(user.balance.toNumber()))).to.greaterThan(0);
+    expect(Number(BigInt(user.balance.toNumber()))).to.greaterThan(0 * Math.pow(10, 6));
+  
+      
   });
 
   it("claims", async () => {
@@ -141,5 +198,28 @@ describe("Team instructions", () => {
 
     const user = await program.account.user.fetch(userPDA);
     expect(Number(BigInt(user.balance.toNumber()))).to.equal(0);
+  });
+
+  it("remove member", async () => {
+    await program.methods
+      .removeMember({
+        teamId: new anchor.BN(teamId),
+        userId: new anchor.BN(userId),
+      })
+      .signers([ownerKeypair])
+      .accountsPartial({
+        signer: ownerKeypair.publicKey,
+        team: teamPDA,
+        teamMember: teamMemberPDA,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const teamMember = await program.account.teamMember.fetchNullable(
+      teamMemberPDA
+    );
+    expect(teamMember).to.be.null;
   });
 });

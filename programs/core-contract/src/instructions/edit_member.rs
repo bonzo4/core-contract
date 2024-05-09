@@ -24,7 +24,10 @@ pub fn edit_member(ctx: Context<EditMember>, options: EditMemberOptions) -> Resu
 #[derive(Accounts)]
 #[instruction(options: EditMemberOptions)]
 pub struct EditMember<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = signer.key() == team.owner,
+    )]
     pub signer: Signer<'info>,
     #[account(
         mut,
