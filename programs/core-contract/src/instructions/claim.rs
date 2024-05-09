@@ -46,7 +46,10 @@ pub fn claim(ctx: Context<Claim>, user_id: u64) -> Result<()> {
 #[derive(Accounts)]
 #[instruction(user_id: u64)]
 pub struct Claim<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = signer.key() == user.authority
+    )]
     pub signer: Signer<'info>,
     #[account(
         mut,
@@ -58,6 +61,7 @@ pub struct Claim<'info> {
         mut,
         seeds = [b"user".as_ref(), user_id.to_string().as_ref()],
         bump,
+        constraint = user.balance > 0,
     )]
     pub user: Account<'info, User>,
     #[account(

@@ -28,6 +28,7 @@ pub struct LeaveTeam<'info> {
         mut,
         seeds = [b"user".as_ref(), options.user_id.to_string().as_ref()],
         bump,
+        constraint = user.authority == signer.key()
     )]
     pub user: Account<'info, User>,
     #[account(

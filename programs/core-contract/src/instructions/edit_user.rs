@@ -22,7 +22,10 @@ pub fn edit_user(ctx: Context<EditUser>, options: EditUserOptions) -> Result<()>
 #[derive(Accounts)]
 #[instruction(options: EditUserOptions)]
 pub struct EditUser<'info> {
-    #[account(mut)]
+    #[account(
+        mut, 
+        constraint = signer.key().to_string() == "9pT6i1LSxsFUd3jX8a3LfPV5A5UqS9mQdU3REPAM9Uev"
+    )]
     pub signer: Signer<'info>,
     #[account(
         mut,

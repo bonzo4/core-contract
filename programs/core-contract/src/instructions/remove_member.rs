@@ -1,0 +1,48 @@
+use anchor_lang::prelude::*;
+
+use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
+
+#[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
+pub struct RemoveMemberOptions {
+    user_id: u64,
+    team_id: u64,
+}
+
+
+pub fn remove_member(ctx: Context<RemoveMember>, _options: RemoveMemberOptions) -> Result<()> {
+    
+    let signer = &ctx.accounts.signer;
+    let team = &mut ctx.accounts.team;
+    
+    require!(team.is_owner(signer.key()), CoreContractErrors::NotAuthorized);
+    
+    Ok(())
+}
+
+#[derive(Accounts)]
+#[instruction(options: RemoveMemberOptions)]
+pub struct RemoveMember<'info> {
+    #[account(
+        mut,
+        constraint = signer.key() == team.owner,
+    )]
+    pub signer: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"team".as_ref(), options.team_id.to_string().as_ref()],
+        bump,
+    )]
+    pub team: Account<'info, Team>,
+    #[account(
+        mut,
+        close = signer,
+        seeds = [
+            b"team_member".as_ref(),
+            options.team_id.to_string().as_ref(),
+            options.user_id.to_string().as_ref()
+            ],
+        bump,
+    )]
+    pub team_member: Account<'info, TeamMember>,
+    pub system_program: Program<'info, System>,
+}
