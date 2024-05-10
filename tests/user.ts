@@ -43,7 +43,7 @@ describe("User instructions", () => {
   it("init owner", async () => {
     // Add your test here.
     const tx = await program.methods
-      .initUser(ownerId)
+      .initUser(new anchor.BN(ownerId))
       .signers([ownerKeypair])
       .accountsPartial({
         signer: ownerKeypair.publicKey,
@@ -62,7 +62,7 @@ describe("User instructions", () => {
 
   it("init user", async () => {
     await program.methods
-      .initUser(userId)
+      .initUser(new anchor.BN(userId))
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
@@ -82,7 +82,7 @@ describe("User instructions", () => {
   it("edits user", async () => {
     await program.methods
       .editUser({
-        userId,
+        userId: new anchor.BN(userId),
         newAuthority: userKeypair.publicKey,
         editId: new anchor.BN(1),
       })
@@ -106,10 +106,10 @@ describe("User instructions", () => {
   it("pays user", async () => {
     await program.methods
       .payUser({
-        userId,
+        userId: new anchor.BN(userId),
         amount: new anchor.BN(1 * Math.pow(10, 6)),
         paymentId: new anchor.BN(1),
-        payerUserId: ownerId,
+        payerUserId: new anchor.BN(ownerId),
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -130,7 +130,7 @@ describe("User instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim({ userId, claimId: new anchor.BN(1) })
+      .claim({ userId: new anchor.BN(userId), claimId: new anchor.BN(1) })
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,

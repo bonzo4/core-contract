@@ -3,7 +3,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 
 use crate::state::User;
 
-pub fn init_user(ctx: Context<InitUser>, user_id: String) -> Result<()> {
+pub fn init_user(ctx: Context<InitUser>, user_id: u64) -> Result<()> {
 
     let signer = &ctx.accounts.signer;
     let user = &mut ctx.accounts.user;
@@ -20,12 +20,12 @@ pub fn init_user(ctx: Context<InitUser>, user_id: String) -> Result<()> {
 
 #[event]
 pub struct UserCreated {
-    pub user_id: String,
+    pub user_id: u64,
 }
 
 
 #[derive(Accounts)]
-#[instruction(user_id: String)]
+#[instruction(user_id: u64)]
 pub struct InitUser<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,

@@ -5,8 +5,8 @@ use crate::state::User;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct PayUserOptions {
-    user_id: String,
-    payer_user_id: String,
+    user_id: u64,
+    payer_user_id: u64,
     payment_id: u64,
     amount: u128,
 }
@@ -49,8 +49,8 @@ pub fn pay_user(ctx: Context<PayUser>, options: PayUserOptions) -> Result<()> {
 
 #[event]
 pub struct PayUserEvent {
-    pub user_id: String,
-    pub payer_user_id: String,
+    pub user_id: u64,
+    pub payer_user_id: u64,
     pub payment_id: u64,
     pub amount: u128,
 }

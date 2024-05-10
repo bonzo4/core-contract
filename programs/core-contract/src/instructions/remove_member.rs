@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct RemoveMemberOptions {
-    user_id: String,
+    user_id: u64,
     team_id: u64,
     remove_id: u64,
 }
@@ -28,7 +28,7 @@ pub fn remove_member(ctx: Context<RemoveMember>, options: RemoveMemberOptions) -
 
 #[event]
 pub struct MemberRemoved {
-    pub user_id: String,
+    pub user_id: u64,
     pub team_id: u64,
     pub remove_id: u64,
 }

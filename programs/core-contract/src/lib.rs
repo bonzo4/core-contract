@@ -13,7 +13,7 @@ declare_id!("AhzB75bfztVnP2mnfTxdxtNrYmUy194XUxzYcJtzpWv5");
 pub mod core_contract {
     use super::*;
 
-    pub fn init_user(ctx: Context<InitUser>, user_id: String) -> Result<()> {
+    pub fn init_user(ctx: Context<InitUser>, user_id: u64) -> Result<()> {
         instructions::init_user(ctx, user_id)
     }
 

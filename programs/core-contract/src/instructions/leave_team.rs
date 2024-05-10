@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::{TeamMember, User}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct LeaveTeamOptions {
-    user_id: String,
+    user_id: u64,
     leave_id: u64,
     team_id: u64,
 }
@@ -28,7 +28,7 @@ pub fn leave_team(ctx: Context<LeaveTeam>, options: LeaveTeamOptions) -> Result<
 
 #[event]
 pub struct LeaveTeamEvent {
-    pub user_id: String,
+    pub user_id: u64,
     pub leave_id: u64,
     pub team_id: u64,
 }

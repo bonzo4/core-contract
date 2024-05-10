@@ -5,7 +5,7 @@ use crate::{error::CoreContractErrors, state::User};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct ClaimOptions {
-    user_id: String,
+    user_id: u64,
     claim_id: u64
 }
 
@@ -59,7 +59,7 @@ pub fn claim(ctx: Context<Claim>, options: ClaimOptions) -> Result<()> {
 
 #[event]
 pub struct ClaimEvent {
-    user_id: String,
+    user_id: u64,
     claim_id: u64,
     amount: u64
 }

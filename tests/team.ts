@@ -88,7 +88,7 @@ describe("Team instructions", () => {
   it("add member", async () => {
     await program.methods
       .addMember({
-        userId,
+        userId: new anchor.BN(userId),
         teamId: new anchor.BN(teamId),
         intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
@@ -111,7 +111,7 @@ describe("Team instructions", () => {
   it("edits member", async () => {
     await program.methods
       .editMember({
-        userId,
+        userId: new anchor.BN(userId),
         teamId: new anchor.BN(teamId),
         newPay: new anchor.BN(1 * Math.pow(10, 6)),
         editId: new anchor.BN(1),
@@ -161,7 +161,7 @@ describe("Team instructions", () => {
     await program.methods
       .payMember({
         teamId: new anchor.BN(userId),
-        userId,
+        userId: new anchor.BN(userId),
         amount: null,
         paymentId: new anchor.BN(1),
       })
@@ -186,7 +186,7 @@ describe("Team instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim({ userId, claimId: new anchor.BN(2) })
+      .claim({ userId: new anchor.BN(userId), claimId: new anchor.BN(2) })
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
@@ -207,7 +207,7 @@ describe("Team instructions", () => {
     await program.methods
       .removeMember({
         teamId: new anchor.BN(teamId),
-        userId,
+        userId: new anchor.BN(userId),
         removeId: new anchor.BN(1),
       })
       .signers([ownerKeypair])
@@ -230,7 +230,7 @@ describe("Team instructions", () => {
   it("leaves team", async () => {
     await program.methods
       .addMember({
-        userId,
+        userId: new anchor.BN(userId),
         teamId: new anchor.BN(teamId),
         intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
@@ -248,7 +248,7 @@ describe("Team instructions", () => {
     await program.methods
       .leaveTeam({
         teamId: new anchor.BN(teamId),
-        userId,
+        userId: new anchor.BN(userId),
         leaveId: new anchor.BN(1),
       })
       .signers([userKeypair])

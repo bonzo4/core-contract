@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::User, utils::is_program_owner};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct EditUserOptions {
-    user_id: String,
+    user_id: u64,
     edit_id: u64,
     new_authority: Pubkey,
 }
@@ -28,7 +28,7 @@ pub fn edit_user(ctx: Context<EditUser>, options: EditUserOptions) -> Result<()>
 
 #[event]
 pub struct EditUserEvent {
-    pub user_id: String,
+    pub user_id: u64,
     pub edit_id: u64,
     pub new_authority: Pubkey,
 }
