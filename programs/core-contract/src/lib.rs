@@ -25,8 +25,8 @@ pub mod core_contract {
         instructions::pay_user(ctx, options)
     }
 
-    pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
-        instructions::claim(ctx, user_id)
+    pub fn claim(ctx: Context<Claim>, options: ClaimOptions) -> Result<()> {
+        instructions::claim(ctx, options)
     }
 
     pub fn init_team(ctx: Context<InitTeam>, team_id: u64) -> Result<()> {

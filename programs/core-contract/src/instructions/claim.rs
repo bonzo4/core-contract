@@ -3,7 +3,13 @@ use anchor_spl::token::{Mint, Token, TokenAccount, TransferChecked, transfer_che
 
 use crate::{error::CoreContractErrors, state::User};
 
-pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
+#[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
+pub struct ClaimOptions {
+    user_id: String,
+    claim_id: u64
+}
+
+pub fn claim(ctx: Context<Claim>, options: ClaimOptions) -> Result<()> {
 
     let signer = &mut ctx.accounts.signer;
     let user = &mut ctx.accounts.user;
@@ -23,7 +29,7 @@ pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
 
     let bump = ctx.bumps.user;
     let seeds = vec![bump];
-    let binding = user_id.to_string();
+    let binding = options.user_id.to_string();
     let seeds = vec![b"user".as_ref(), binding.as_ref(), seeds.as_slice()];
     let seeds = vec![seeds.as_slice()];
     let seeds = seeds.as_slice();
@@ -43,7 +49,8 @@ pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
     user.balance = 0;
 
     emit!(ClaimEvent {
-        user_id,
+        user_id: options.user_id,
+        claim_id: options.claim_id,
         amount: balance as u64
     });
 
@@ -53,12 +60,13 @@ pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
 #[event]
 pub struct ClaimEvent {
     user_id: String,
+    claim_id: u64,
     amount: u64
 }
 
 
 #[derive(Accounts)]
-#[instruction(user_id: String)]
+#[instruction(options: ClaimOptions)]
 pub struct Claim<'info> {
     #[account(
         mut,
@@ -73,7 +81,7 @@ pub struct Claim<'info> {
     pub recipient_payer_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        seeds = [b"user".as_ref(), user_id.to_string().as_ref()],
+        seeds = [b"user".as_ref(), options.user_id.to_string().as_ref()],
         bump,
         constraint = user.balance > 0,
     )]

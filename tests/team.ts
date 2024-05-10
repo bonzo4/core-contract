@@ -113,7 +113,8 @@ describe("Team instructions", () => {
       .editMember({
         userId,
         teamId: new anchor.BN(teamId),
-        pay: new anchor.BN(1 * Math.pow(10, 6)),
+        newPay: new anchor.BN(1 * Math.pow(10, 6)),
+        editId: new anchor.BN(1),
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -138,6 +139,7 @@ describe("Team instructions", () => {
       .payTeam({
         teamId: new anchor.BN(userId),
         amount: new anchor.BN(1 * Math.pow(10, 6)),
+        paymentId: new anchor.BN(1),
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -161,6 +163,7 @@ describe("Team instructions", () => {
         teamId: new anchor.BN(userId),
         userId,
         amount: null,
+        paymentId: new anchor.BN(1),
       })
       .signers([managerKey])
       .accountsPartial({
@@ -183,7 +186,7 @@ describe("Team instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim(userId)
+      .claim({ userId, claimId: new anchor.BN(2) })
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
@@ -205,6 +208,7 @@ describe("Team instructions", () => {
       .removeMember({
         teamId: new anchor.BN(teamId),
         userId,
+        removeId: new anchor.BN(1),
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -245,6 +249,7 @@ describe("Team instructions", () => {
       .leaveTeam({
         teamId: new anchor.BN(teamId),
         userId,
+        leaveId: new anchor.BN(1),
       })
       .signers([userKeypair])
       .accountsPartial({

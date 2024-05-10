@@ -84,6 +84,7 @@ describe("User instructions", () => {
       .editUser({
         userId,
         newAuthority: userKeypair.publicKey,
+        editId: new anchor.BN(1),
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -107,6 +108,8 @@ describe("User instructions", () => {
       .payUser({
         userId,
         amount: new anchor.BN(1 * Math.pow(10, 6)),
+        paymentId: new anchor.BN(1),
+        payerUserId: ownerId,
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -114,6 +117,7 @@ describe("User instructions", () => {
         user: userPDA,
         usdcMint,
         usdcPayerAccount: ownerUsdcAccount,
+        payerUser: ownerPDA,
       })
       .rpc()
       .catch((e) => {
@@ -126,7 +130,7 @@ describe("User instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim(userId)
+      .claim({ userId, claimId: new anchor.BN(1) })
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,

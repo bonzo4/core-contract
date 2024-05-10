@@ -5,6 +5,7 @@ use crate::{error::CoreContractErrors, state::User, utils::is_program_owner};
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct EditUserOptions {
     user_id: String,
+    edit_id: u64,
     new_authority: Pubkey,
 }
 
@@ -18,6 +19,7 @@ pub fn edit_user(ctx: Context<EditUser>, options: EditUserOptions) -> Result<()>
 
     emit!(EditUserEvent {
         user_id: options.user_id,
+        edit_id: options.edit_id,
         new_authority: options.new_authority,
     });
     
@@ -27,6 +29,7 @@ pub fn edit_user(ctx: Context<EditUser>, options: EditUserOptions) -> Result<()>
 #[event]
 pub struct EditUserEvent {
     pub user_id: String,
+    pub edit_id: u64,
     pub new_authority: Pubkey,
 }
 

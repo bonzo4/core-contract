@@ -6,10 +6,11 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
 pub struct RemoveMemberOptions {
     user_id: String,
     team_id: u64,
+    remove_id: u64,
 }
 
 
-pub fn remove_member(ctx: Context<RemoveMember>, _options: RemoveMemberOptions) -> Result<()> {
+pub fn remove_member(ctx: Context<RemoveMember>, options: RemoveMemberOptions) -> Result<()> {
     
     let signer = &ctx.accounts.signer;
     let team = &mut ctx.accounts.team;
@@ -17,8 +18,9 @@ pub fn remove_member(ctx: Context<RemoveMember>, _options: RemoveMemberOptions) 
     require!(team.is_owner(signer.key()), CoreContractErrors::NotAuthorized);
     
     emit!(MemberRemoved {
-        user_id: _options.user_id,
-        team_id: _options.team_id,
+        user_id: options.user_id,
+        team_id: options.team_id,
+        remove_id: options.remove_id,
     });
     
     Ok(())
@@ -28,6 +30,7 @@ pub fn remove_member(ctx: Context<RemoveMember>, _options: RemoveMemberOptions) 
 pub struct MemberRemoved {
     pub user_id: String,
     pub team_id: u64,
+    pub remove_id: u64,
 }
 
 

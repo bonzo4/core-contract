@@ -7,6 +7,7 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember, User}, utils::i
 pub struct PayMemberOptions {
     team_id: u64,
     user_id: String,
+    payment_id: u64,
     amount: Option<u128>,
 }
 
@@ -60,6 +61,7 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
     emit!(PayMemberEvent {
         team_id: options.team_id,
         user_id: options.user_id,
+        payment_id: options.payment_id,
         amount: pay,
     });
 
@@ -70,6 +72,7 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
 pub struct PayMemberEvent {
     pub team_id: u64,
     pub user_id: String,
+    pub payment_id: u64,
     pub amount: u128,
 }
 

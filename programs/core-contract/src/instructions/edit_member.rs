@@ -6,7 +6,8 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
 pub struct EditMemberOptions {
     user_id: String,
     team_id: u64,
-    pay: u128
+    edit_id: u64,
+    new_pay: u128
 }
 
 pub fn edit_member(ctx: Context<EditMember>, options: EditMemberOptions) -> Result<()> {
@@ -16,12 +17,13 @@ pub fn edit_member(ctx: Context<EditMember>, options: EditMemberOptions) -> Resu
     require!(team.is_owner(signer.key()), CoreContractErrors::NotAuthorized);
     let team_member = &mut ctx.accounts.team_member;
 
-    team_member.pay = options.pay;
+    team_member.pay = options.new_pay;
 
     emit!(EditMemberEvent {
         user_id: options.user_id,
         team_id: options.team_id,
-        pay: options.pay
+        edit_id: options.edit_id,
+        new_pay: options.new_pay
     });
     
     Ok(())
@@ -31,7 +33,8 @@ pub fn edit_member(ctx: Context<EditMember>, options: EditMemberOptions) -> Resu
 pub struct EditMemberEvent {
     user_id: String,
     team_id: u64,
-    pay: u128
+    edit_id: u64,
+    new_pay: u128
 }
 
 #[derive(Accounts)]
