@@ -21,7 +21,7 @@ describe("Team instructions", () => {
     usdcMint,
     ownerKeypair.publicKey
   );
-  const ownerId = 0;
+  const ownerId = "0";
   const [ownerPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -35,7 +35,7 @@ describe("Team instructions", () => {
     usdcMint,
     userKeypair.publicKey
   );
-  const userId = 1;
+  const userId = "1";
   const [userPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -88,7 +88,7 @@ describe("Team instructions", () => {
   it("add member", async () => {
     await program.methods
       .addMember({
-        userId: new anchor.BN(userId),
+        userId,
         teamId: new anchor.BN(teamId),
         intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
@@ -111,7 +111,7 @@ describe("Team instructions", () => {
   it("edits member", async () => {
     await program.methods
       .editMember({
-        userId: new anchor.BN(userId),
+        userId,
         teamId: new anchor.BN(teamId),
         pay: new anchor.BN(1 * Math.pow(10, 6)),
       })
@@ -159,7 +159,7 @@ describe("Team instructions", () => {
     await program.methods
       .payMember({
         teamId: new anchor.BN(userId),
-        userId: new anchor.BN(userId),
+        userId,
         amount: null,
       })
       .signers([managerKey])
@@ -183,7 +183,7 @@ describe("Team instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim(new anchor.BN(userId))
+      .claim(userId)
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
@@ -204,7 +204,7 @@ describe("Team instructions", () => {
     await program.methods
       .removeMember({
         teamId: new anchor.BN(teamId),
-        userId: new anchor.BN(userId),
+        userId,
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -226,7 +226,7 @@ describe("Team instructions", () => {
   it("leaves team", async () => {
     await program.methods
       .addMember({
-        userId: new anchor.BN(userId),
+        userId,
         teamId: new anchor.BN(teamId),
         intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
@@ -244,7 +244,7 @@ describe("Team instructions", () => {
     await program.methods
       .leaveTeam({
         teamId: new anchor.BN(teamId),
-        userId: new anchor.BN(userId),
+        userId,
       })
       .signers([userKeypair])
       .accountsPartial({

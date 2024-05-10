@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct RemoveMemberOptions {
-    user_id: u64,
+    user_id: String,
     team_id: u64,
 }
 
@@ -16,8 +16,20 @@ pub fn remove_member(ctx: Context<RemoveMember>, _options: RemoveMemberOptions) 
     
     require!(team.is_owner(signer.key()), CoreContractErrors::NotAuthorized);
     
+    emit!(MemberRemoved {
+        user_id: _options.user_id,
+        team_id: _options.team_id,
+    });
+    
     Ok(())
 }
+
+#[event]
+pub struct MemberRemoved {
+    pub user_id: String,
+    pub team_id: u64,
+}
+
 
 #[derive(Accounts)]
 #[instruction(options: RemoveMemberOptions)]

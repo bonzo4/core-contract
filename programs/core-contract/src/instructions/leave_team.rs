@@ -4,20 +4,32 @@ use crate::{error::CoreContractErrors, state::{TeamMember, User}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct LeaveTeamOptions {
-    user_id: u64,
+    user_id: String,
     team_id: u64,
 }
 
 
-pub fn leave_team(ctx: Context<LeaveTeam>, _options: LeaveTeamOptions) -> Result<()> {
+pub fn leave_team(ctx: Context<LeaveTeam>, options: LeaveTeamOptions) -> Result<()> {
     
     let signer = &ctx.accounts.signer;
     let user = &mut ctx.accounts.user;
     
     require!(user.has_authority(signer.key()), CoreContractErrors::NotAuthorized);
+
+    emit!(LeaveTeamEvent {
+        user_id: options.user_id,
+        team_id: options.team_id,
+    });
     
     Ok(())
 }
+
+#[event]
+pub struct LeaveTeamEvent {
+    pub user_id: String,
+    pub team_id: u64,
+}
+
 
 #[derive(Accounts)]
 #[instruction(options: LeaveTeamOptions)]

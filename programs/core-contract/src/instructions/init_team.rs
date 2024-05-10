@@ -3,7 +3,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 
 use crate::state::Team;
 
-pub fn init_team(ctx: Context<InitTeam>, _team_id: u64) -> Result<()> {
+pub fn init_team(ctx: Context<InitTeam>, team_id: u64) -> Result<()> {
    
    let signer = &ctx.accounts.signer;
    let team = &mut ctx.accounts.team;
@@ -12,9 +12,17 @@ pub fn init_team(ctx: Context<InitTeam>, _team_id: u64) -> Result<()> {
    team.bump = bump;
    team.owner = signer.key();
    team.balance = 0;
+
+   emit!(TeamCreated { team_id });
    
    Ok(())   
 }
+
+#[event]
+pub struct TeamCreated {
+    pub team_id: u64,
+}
+
 
 #[derive(Accounts)]
 #[instruction(team_id: u64)]

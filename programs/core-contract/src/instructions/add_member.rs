@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct AddMemberOptions {
-    user_id: u64,
+    user_id: String,
     team_id: u64,
     intial_pay: u128,
 }
@@ -19,11 +19,20 @@ pub fn add_member(ctx: Context<AddMember>, options: AddMemberOptions) -> Result<
     let team_member = &mut ctx.accounts.team_member;
     let bump = ctx.bumps.team_member;
 
+    
+
     team_member.bump = bump;
-    team_member.user_id = options.user_id;
     team_member.pay = options.intial_pay;
+
+    emit!(AddMemberEvent { user_id: options.user_id, team_id: options.team_id });
     
     Ok(())
+}
+
+#[event]
+pub struct AddMemberEvent {
+    user_id: String,
+    team_id: u64
 }
 
 #[derive(Accounts)]

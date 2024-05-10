@@ -13,7 +13,7 @@ declare_id!("AhzB75bfztVnP2mnfTxdxtNrYmUy194XUxzYcJtzpWv5");
 pub mod core_contract {
     use super::*;
 
-    pub fn init_user(ctx: Context<InitUser>, user_id: u64) -> Result<()> {
+    pub fn init_user(ctx: Context<InitUser>, user_id: String) -> Result<()> {
         instructions::init_user(ctx, user_id)
     }
 
@@ -25,7 +25,7 @@ pub mod core_contract {
         instructions::pay_user(ctx, options)
     }
 
-    pub fn claim(ctx: Context<Claim>, user_id: u64) -> Result<()> {
+    pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
         instructions::claim(ctx, user_id)
     }
 

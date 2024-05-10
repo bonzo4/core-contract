@@ -35,8 +35,22 @@ pub fn pay_team(ctx: Context<PayTeam>, options: PayTeamOptions) -> Result<()> {
     
     team.increment_balance(options.amount);
 
+    emit!(
+        PayTeamEvent {
+            team_id: options.team_id,
+            amount: options.amount,
+        }
+    );
+
     Ok(())
 }
+
+#[event]
+pub struct PayTeamEvent {
+    pub team_id: u64,
+    pub amount: u128,
+}
+
 
 #[derive(Accounts)]
 #[instruction(options: PayTeamOptions)]

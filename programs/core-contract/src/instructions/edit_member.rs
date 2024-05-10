@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct EditMemberOptions {
-    user_id: u64,
+    user_id: String,
     team_id: u64,
     pay: u128
 }
@@ -17,8 +17,21 @@ pub fn edit_member(ctx: Context<EditMember>, options: EditMemberOptions) -> Resu
     let team_member = &mut ctx.accounts.team_member;
 
     team_member.pay = options.pay;
+
+    emit!(EditMemberEvent {
+        user_id: options.user_id,
+        team_id: options.team_id,
+        pay: options.pay
+    });
     
     Ok(())
+}
+
+#[event]
+pub struct EditMemberEvent {
+    user_id: String,
+    team_id: u64,
+    pay: u128
 }
 
 #[derive(Accounts)]

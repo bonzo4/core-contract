@@ -3,7 +3,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount, TransferChecked, transfer_che
 
 use crate::{error::CoreContractErrors, state::User};
 
-pub fn claim(ctx: Context<Claim>, user_id: u64) -> Result<()> {
+pub fn claim(ctx: Context<Claim>, user_id: String) -> Result<()> {
 
     let signer = &mut ctx.accounts.signer;
     let user = &mut ctx.accounts.user;
@@ -28,23 +28,37 @@ pub fn claim(ctx: Context<Claim>, user_id: u64) -> Result<()> {
     let seeds = vec![seeds.as_slice()];
     let seeds = seeds.as_slice();
 
+    let balance = user.balance;
+
     transfer_checked(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
             cpi_accounts, 
             seeds
         ),
-        user.balance as u64,
+        balance as u64,
         usdc_mint.decimals,
     )?;
 
     user.balance = 0;
 
+    emit!(ClaimEvent {
+        user_id,
+        amount: balance as u64
+    });
+
     Ok(())
 }
 
+#[event]
+pub struct ClaimEvent {
+    user_id: String,
+    amount: u64
+}
+
+
 #[derive(Accounts)]
-#[instruction(user_id: u64)]
+#[instruction(user_id: String)]
 pub struct Claim<'info> {
     #[account(
         mut,

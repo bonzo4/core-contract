@@ -17,7 +17,7 @@ describe("User instructions", () => {
     usdcMint,
     ownerKeypair.publicKey
   );
-  const ownerId = 0;
+  const ownerId = "0";
   const [ownerPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -31,7 +31,7 @@ describe("User instructions", () => {
     usdcMint,
     userKeypair.publicKey
   );
-  const userId = 1;
+  const userId = "1";
   const [userPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -43,7 +43,7 @@ describe("User instructions", () => {
   it("init owner", async () => {
     // Add your test here.
     const tx = await program.methods
-      .initUser(new anchor.BN(ownerId))
+      .initUser(ownerId)
       .signers([ownerKeypair])
       .accountsPartial({
         signer: ownerKeypair.publicKey,
@@ -62,7 +62,7 @@ describe("User instructions", () => {
 
   it("init user", async () => {
     await program.methods
-      .initUser(new anchor.BN(userId))
+      .initUser(userId)
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
@@ -82,7 +82,7 @@ describe("User instructions", () => {
   it("edits user", async () => {
     await program.methods
       .editUser({
-        userId: new anchor.BN(userId),
+        userId,
         newAuthority: userKeypair.publicKey,
       })
       .signers([ownerKeypair])
@@ -105,7 +105,7 @@ describe("User instructions", () => {
   it("pays user", async () => {
     await program.methods
       .payUser({
-        userId: new anchor.BN(userId),
+        userId,
         amount: new anchor.BN(1 * Math.pow(10, 6)),
       })
       .signers([ownerKeypair])
@@ -126,7 +126,7 @@ describe("User instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim(new anchor.BN(userId))
+      .claim(userId)
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,

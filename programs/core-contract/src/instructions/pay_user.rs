@@ -5,7 +5,7 @@ use crate::state::User;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct PayUserOptions {
-    user_id: u64,
+    user_id: String,
     amount: u128,
 }
 
@@ -35,8 +35,20 @@ pub fn pay_user(ctx: Context<PayUser>, options: PayUserOptions) -> Result<()> {
     
     user.increment_balance(options.amount);
 
+    emit!(PayUserEvent {
+        user_id: options.user_id,
+        amount: options.amount,
+    });
+
     Ok(())
 }
+
+#[event]
+pub struct PayUserEvent {
+    pub user_id: String,
+    pub amount: u128,
+}
+
 
 #[derive(Accounts)]
 #[instruction(options: PayUserOptions)]
