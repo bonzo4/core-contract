@@ -4,6 +4,7 @@ import { getProgram } from "./utils/program";
 import { getOwnerKeypair, getUserKeypair } from "./utils/wallets";
 import { expect } from "chai";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { encodeUUID } from "./utils/encode";
 
 describe("User instructions", () => {
   const usdcMint = new PublicKey(
@@ -17,7 +18,8 @@ describe("User instructions", () => {
     usdcMint,
     ownerKeypair.publicKey
   );
-  const ownerId = "0";
+  const ownerId = encodeUUID("a1d12868-688d-40fb-85a0-72b21fd377e2");
+  console.log(ownerId);
   const [ownerPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -31,11 +33,12 @@ describe("User instructions", () => {
     usdcMint,
     userKeypair.publicKey
   );
-  const userId = "1";
+  const userId = encodeUUID("bcfe3881-f13a-4af0-ba83-611046788ff6");
+  console.log(userId);
   const [userPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
-      anchor.utils.bytes.utf8.encode(userId.toString()),
+      anchor.utils.bytes.utf8.encode(userId),
     ],
     program.programId
   );
@@ -43,7 +46,7 @@ describe("User instructions", () => {
   it("init owner", async () => {
     // Add your test here.
     const tx = await program.methods
-      .initUser(new anchor.BN(ownerId))
+      .initUser(ownerId)
       .signers([ownerKeypair])
       .accountsPartial({
         signer: ownerKeypair.publicKey,
@@ -62,7 +65,7 @@ describe("User instructions", () => {
 
   it("init user", async () => {
     await program.methods
-      .initUser(new anchor.BN(userId))
+      .initUser(userId)
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
@@ -82,7 +85,7 @@ describe("User instructions", () => {
   it("edits user", async () => {
     await program.methods
       .editUser({
-        userId: new anchor.BN(userId),
+        userId,
         newAuthority: userKeypair.publicKey,
         editId: new anchor.BN(1),
       })
@@ -106,10 +109,10 @@ describe("User instructions", () => {
   it("pays user", async () => {
     await program.methods
       .payUser({
-        userId: new anchor.BN(userId),
+        userId,
         amount: new anchor.BN(1 * Math.pow(10, 6)),
         paymentId: new anchor.BN(1),
-        payerUserId: new anchor.BN(ownerId),
+        payerUserId: ownerId,
       })
       .signers([ownerKeypair])
       .accountsPartial({
@@ -130,13 +133,13 @@ describe("User instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim({ userId: new anchor.BN(userId), claimId: new anchor.BN(1) })
+      .claim({ userId, claimId: new anchor.BN(1) })
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
         user: userPDA,
         usdcMint,
-        recipientPayerAccount: userUsdcAccount,
+        recipientUsdcAccount: userUsdcAccount,
       })
       .rpc()
       .catch((e) => {

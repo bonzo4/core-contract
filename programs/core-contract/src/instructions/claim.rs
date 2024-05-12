@@ -5,32 +5,32 @@ use crate::{error::CoreContractErrors, state::User};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct ClaimOptions {
-    user_id: u64,
+    user_id: String,
     claim_id: u64
 }
 
-pub fn claim(ctx: Context<Claim>, options: ClaimOptions) -> Result<()> {
+pub fn claim(ctx: Context<Claim>, options: &ClaimOptions) -> Result<()> {
 
     let signer = &mut ctx.accounts.signer;
     let user = &mut ctx.accounts.user;
 
     require!(user.has_authority(signer.key()), CoreContractErrors::NotAuthorized);
 
-    let recipient_payer_account = &mut ctx.accounts.recipient_payer_account;
+    let recipient_usdc_account = &mut ctx.accounts.recipient_usdc_account;
     let user_vault = &mut ctx.accounts.user_vault;
     let usdc_mint = &mut ctx.accounts.usdc_mint;
 
     let cpi_accounts = TransferChecked {
         from: user_vault.to_account_info(),
-        to: recipient_payer_account.to_account_info(),
+        to: recipient_usdc_account.to_account_info(),
         mint: usdc_mint.to_account_info(),
         authority: user.to_account_info(),
     };
 
     let bump = ctx.bumps.user;
     let seeds = vec![bump];
-    let binding = options.user_id.to_string();
-    let seeds = vec![b"user".as_ref(), binding.as_ref(), seeds.as_slice()];
+    let user_id = options.user_id.to_string();
+    let seeds = vec![b"user".as_ref(), user_id.as_ref(), seeds.as_slice()];
     let seeds = vec![seeds.as_slice()];
     let seeds = seeds.as_slice();
 
@@ -49,9 +49,7 @@ pub fn claim(ctx: Context<Claim>, options: ClaimOptions) -> Result<()> {
     user.balance = 0;
 
     emit!(ClaimEvent {
-        user_id: options.user_id,
         claim_id: options.claim_id,
-        amount: balance as u64
     });
 
     Ok(())
@@ -59,9 +57,7 @@ pub fn claim(ctx: Context<Claim>, options: ClaimOptions) -> Result<()> {
 
 #[event]
 pub struct ClaimEvent {
-    user_id: u64,
     claim_id: u64,
-    amount: u64
 }
 
 
@@ -78,12 +74,11 @@ pub struct Claim<'info> {
         token::mint=usdc_mint,
         token::authority=signer
     )]
-    pub recipient_payer_account: Account<'info, TokenAccount>,
+    pub recipient_usdc_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        seeds = [b"user".as_ref(), options.user_id.to_string().as_ref()],
+        seeds = [b"user".as_ref(), options.user_id.as_ref()],
         bump,
-        constraint = user.balance > 0,
     )]
     pub user: Account<'info, User>,
     #[account(

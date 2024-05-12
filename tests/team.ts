@@ -8,6 +8,7 @@ import {
 } from "./utils/wallets";
 import { expect } from "chai";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { encodeUUID } from "./utils/encode";
 
 describe("Team instructions", () => {
   const usdcMint = new PublicKey(
@@ -21,7 +22,7 @@ describe("Team instructions", () => {
     usdcMint,
     ownerKeypair.publicKey
   );
-  const ownerId = "0";
+  const ownerId = encodeUUID("a1d12868-688d-40fb-85a0-72b21fd377e2");
   const [ownerPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -35,7 +36,7 @@ describe("Team instructions", () => {
     usdcMint,
     userKeypair.publicKey
   );
-  const userId = "1";
+  const userId = encodeUUID("bcfe3881-f13a-4af0-ba83-611046788ff6");
   const [userPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -46,7 +47,7 @@ describe("Team instructions", () => {
 
   const managerKey = getManagerKeypair();
 
-  const teamId = 1;
+  const teamId = 2;
 
   const [teamPDA] = PublicKey.findProgramAddressSync(
     [
@@ -88,7 +89,7 @@ describe("Team instructions", () => {
   it("add member", async () => {
     await program.methods
       .addMember({
-        userId: new anchor.BN(userId),
+        userId,
         teamId: new anchor.BN(teamId),
         intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
@@ -111,7 +112,7 @@ describe("Team instructions", () => {
   it("edits member", async () => {
     await program.methods
       .editMember({
-        userId: new anchor.BN(userId),
+        userId,
         teamId: new anchor.BN(teamId),
         newPay: new anchor.BN(1 * Math.pow(10, 6)),
         editId: new anchor.BN(1),
@@ -137,7 +138,7 @@ describe("Team instructions", () => {
   it("pays team", async () => {
     await program.methods
       .payTeam({
-        teamId: new anchor.BN(userId),
+        teamId: new anchor.BN(teamId),
         amount: new anchor.BN(1 * Math.pow(10, 6)),
         paymentId: new anchor.BN(1),
       })
@@ -160,8 +161,8 @@ describe("Team instructions", () => {
   it("pays member", async () => {
     await program.methods
       .payMember({
-        teamId: new anchor.BN(userId),
-        userId: new anchor.BN(userId),
+        teamId: new anchor.BN(teamId),
+        userId,
         amount: null,
         paymentId: new anchor.BN(1),
       })
@@ -186,13 +187,13 @@ describe("Team instructions", () => {
 
   it("claims", async () => {
     await program.methods
-      .claim({ userId: new anchor.BN(userId), claimId: new anchor.BN(2) })
+      .claim({ userId, claimId: new anchor.BN(2) })
       .signers([userKeypair])
       .accountsPartial({
         signer: userKeypair.publicKey,
         user: userPDA,
         usdcMint,
-        recipientPayerAccount: userUsdcAccount,
+        recipientUsdcAccount: userUsdcAccount,
       })
       .rpc()
       .catch((e) => {
@@ -207,7 +208,7 @@ describe("Team instructions", () => {
     await program.methods
       .removeMember({
         teamId: new anchor.BN(teamId),
-        userId: new anchor.BN(userId),
+        userId,
         removeId: new anchor.BN(1),
       })
       .signers([ownerKeypair])
@@ -230,7 +231,7 @@ describe("Team instructions", () => {
   it("leaves team", async () => {
     await program.methods
       .addMember({
-        userId: new anchor.BN(userId),
+        userId,
         teamId: new anchor.BN(teamId),
         intialPay: new anchor.BN(0 * Math.pow(10, 6)),
       })
@@ -248,7 +249,7 @@ describe("Team instructions", () => {
     await program.methods
       .leaveTeam({
         teamId: new anchor.BN(teamId),
-        userId: new anchor.BN(userId),
+        userId,
         leaveId: new anchor.BN(1),
       })
       .signers([userKeypair])

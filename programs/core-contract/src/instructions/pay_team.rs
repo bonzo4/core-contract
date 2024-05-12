@@ -38,9 +38,7 @@ pub fn pay_team(ctx: Context<PayTeam>, options: PayTeamOptions) -> Result<()> {
 
     emit!(
         PayTeamEvent {
-            team_id: options.team_id,
             payment_id: options.payment_id,
-            amount: options.amount,
         }
     );
 
@@ -49,9 +47,7 @@ pub fn pay_team(ctx: Context<PayTeam>, options: PayTeamOptions) -> Result<()> {
 
 #[event]
 pub struct PayTeamEvent {
-    pub team_id: u64,
     pub payment_id: u64,
-    pub amount: u128,
 }
 
 

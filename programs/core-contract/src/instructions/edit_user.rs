@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::User, utils::is_program_owner};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct EditUserOptions {
-    user_id: u64,
+    user_id: String,
     edit_id: u64,
     new_authority: Pubkey,
 }
@@ -18,9 +18,7 @@ pub fn edit_user(ctx: Context<EditUser>, options: EditUserOptions) -> Result<()>
     user.authority = options.new_authority;
 
     emit!(EditUserEvent {
-        user_id: options.user_id,
         edit_id: options.edit_id,
-        new_authority: options.new_authority,
     });
     
     Ok(())
@@ -28,9 +26,7 @@ pub fn edit_user(ctx: Context<EditUser>, options: EditUserOptions) -> Result<()>
 
 #[event]
 pub struct EditUserEvent {
-    pub user_id: u64,
     pub edit_id: u64,
-    pub new_authority: Pubkey,
 }
 
 #[derive(Accounts)]
@@ -43,7 +39,7 @@ pub struct EditUser<'info> {
     pub signer: Signer<'info>,
     #[account(
         mut,
-        seeds = [b"user".as_ref(), options.user_id.to_string().as_ref()],
+        seeds = [b"user".as_ref(), options.user_id.as_ref()],
         bump,
     )]
     pub user: Account<'info, User>,

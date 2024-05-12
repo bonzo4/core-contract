@@ -6,7 +6,7 @@ use crate::{error::CoreContractErrors, state::{Team, TeamMember, User}, utils::i
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct PayMemberOptions {
     team_id: u64,
-    user_id: u64,
+    user_id: String,
     payment_id: u64,
     amount: Option<u128>,
 }
@@ -59,10 +59,7 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
     user.balance += pay;
 
     emit!(PayMemberEvent {
-        team_id: options.team_id,
-        user_id: options.user_id,
         payment_id: options.payment_id,
-        amount: pay,
     });
 
     Ok(())
@@ -70,12 +67,8 @@ pub fn pay_member(ctx: Context<PayMember>, options: PayMemberOptions) -> Result<
 
 #[event]
 pub struct PayMemberEvent {
-    pub team_id: u64,
-    pub user_id: u64,
     pub payment_id: u64,
-    pub amount: u128,
 }
-
 
 #[derive(Accounts)]
 #[instruction(options: PayMemberOptions)]
@@ -89,7 +82,7 @@ pub struct PayMember<'info> {
     pub signer: Signer<'info>,
     #[account(
         mut,
-        seeds = [b"user".as_ref(), options.user_id.to_string().as_ref()],
+        seeds = [b"user".as_ref(), options.user_id.as_ref()],
         bump,
     )]
     pub user: Account<'info, User>,
@@ -120,7 +113,7 @@ pub struct PayMember<'info> {
         seeds = [
             b"team_member".as_ref(),
             options.team_id.to_string().as_ref(),
-            options.user_id.to_string().as_ref()
+            options.user_id.as_ref()
             ],
         bump,
     )]

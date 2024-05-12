@@ -4,7 +4,7 @@ use crate::{error::CoreContractErrors, state::{TeamMember, User}};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct LeaveTeamOptions {
-    user_id: u64,
+    user_id: String,
     leave_id: u64,
     team_id: u64,
 }
@@ -18,9 +18,7 @@ pub fn leave_team(ctx: Context<LeaveTeam>, options: LeaveTeamOptions) -> Result<
     require!(user.has_authority(signer.key()), CoreContractErrors::NotAuthorized);
 
     emit!(LeaveTeamEvent {
-        user_id: options.user_id,
         leave_id: options.leave_id,
-        team_id: options.team_id,
     });
     
     Ok(())
@@ -28,9 +26,7 @@ pub fn leave_team(ctx: Context<LeaveTeam>, options: LeaveTeamOptions) -> Result<
 
 #[event]
 pub struct LeaveTeamEvent {
-    pub user_id: u64,
     pub leave_id: u64,
-    pub team_id: u64,
 }
 
 
@@ -44,7 +40,7 @@ pub struct LeaveTeam<'info> {
     pub signer: Signer<'info>,
     #[account(
         mut,
-        seeds = [b"user".as_ref(), options.user_id.to_string().as_ref()],
+        seeds = [b"user".as_ref(), options.user_id.as_ref()],
         bump,
         constraint = user.authority == signer.key()
     )]
@@ -55,7 +51,7 @@ pub struct LeaveTeam<'info> {
         seeds = [
             b"team_member".as_ref(),
             options.team_id.to_string().as_ref(),
-            options.user_id.to_string().as_ref()
+            options.user_id.as_ref()
             ],
         bump,
     )]
