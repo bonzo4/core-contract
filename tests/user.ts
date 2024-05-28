@@ -5,6 +5,7 @@ import { getOwnerKeypair, getUserKeypair } from "./utils/wallets";
 import { expect } from "chai";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { encodeUUID } from "./utils/encode";
+import { BN } from "bn.js";
 
 describe("User instructions", () => {
   const usdcMint = new PublicKey(
@@ -19,7 +20,6 @@ describe("User instructions", () => {
     ownerKeypair.publicKey
   );
   const ownerId = encodeUUID("a1d12868-688d-40fb-85a0-72b21fd377e2");
-  console.log(ownerId);
   const [ownerPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
@@ -34,11 +34,20 @@ describe("User instructions", () => {
     userKeypair.publicKey
   );
   const userId = encodeUUID("bcfe3881-f13a-4af0-ba83-611046788ff6");
-  console.log(userId);
   const [userPDA] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("user"),
-      anchor.utils.bytes.utf8.encode(userId),
+      anchor.utils.bytes.utf8.encode(userId.toString()),
+    ],
+    program.programId
+  );
+
+  const invoiceId = 5;
+  const [invoicePDA] = PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("user_invoice"),
+      anchor.utils.bytes.utf8.encode(userId.toString()),
+      anchor.utils.bytes.utf8.encode(invoiceId.toString()),
     ],
     program.programId
   );
@@ -148,5 +157,56 @@ describe("User instructions", () => {
 
     const user = await program.account.user.fetch(userPDA);
     expect(Number(BigInt(user.balance.toNumber()))).to.equal(0);
+  });
+
+  it("creates user invoice", async () => {
+    await program.methods
+      .createUserInvoice({
+        userId,
+        invoiceId: new anchor.BN(invoiceId),
+        requestedAmount: new anchor.BN(1 * Math.pow(10, 6)),
+      })
+      .signers([userKeypair])
+      .accountsPartial({
+        signer: userKeypair.publicKey,
+        user: userPDA,
+        invoice: invoicePDA,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const invoice = await program.account.userInvoice.fetch(invoicePDA);
+    expect(
+      invoice.requestedAmount.div(new anchor.BN(10 ** 6)).toNumber()
+    ).to.equal(1);
+  });
+
+  it("pays invoice", async () => {
+    await program.methods
+      .payUserInvoice({
+        userId,
+        invoiceId: new anchor.BN(invoiceId),
+      })
+      .signers([ownerKeypair])
+      .accountsPartial({
+        signer: ownerKeypair.publicKey,
+        user: userPDA,
+        invoice: invoicePDA,
+        usdcMint,
+        usdcPayerAccount: ownerUsdcAccount,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const invoice = await program.account.userInvoice.fetch(invoicePDA);
+    expect(invoice.isPaid).to.equal(true);
+    const user = await program.account.user.fetch(userPDA);
+    expect(
+      Number(BigInt(user.balance.div(new anchor.BN(10 ** 6)).toNumber()))
+    ).to.greaterThan(0);
   });
 });

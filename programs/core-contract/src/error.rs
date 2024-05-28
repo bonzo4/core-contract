@@ -7,5 +7,7 @@ pub enum CoreContractErrors {
     #[msg("You are not Authorized to perform this action.")]
     NotAuthorized,
     #[msg("Balance too low.")]
-    BalanceTooLow
+    BalanceTooLow,
+    #[msg("Invoice already paid.")]
+    InvoicePaid
 }

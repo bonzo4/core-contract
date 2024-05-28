@@ -56,4 +56,20 @@ pub mod core_contract {
     pub fn pay_team(ctx: Context<PayTeam>, options: PayTeamOptions) -> Result<()> {
         instructions::pay_team(ctx, options)
     }
+
+    pub fn create_user_invoice(ctx: Context<CreateUserInvoice>, options: CreateUserInvoiceOptions) -> Result<()> {
+        instructions::create_user_invoice(ctx, options)
+    }
+
+    pub fn pay_user_invoice(ctx: Context<PayUserInvoice>, options: PayUserInvoiceOptions) -> Result<()> {
+        instructions::pay_user_invoice(ctx, options)
+    }
+
+    pub fn create_team_invoice(ctx: Context<CreateTeamInvoice>, options: CreateTeamInvoiceOptions) -> Result<()> {
+        instructions::create_team_invoice(ctx, options)
+    }
+
+    pub fn pay_team_invoice(ctx: Context<PayTeamInvoice>, options: PayTeamInvoiceOptions) -> Result<()> {
+        instructions::pay_team_invoice(ctx, options)
+    }
 }

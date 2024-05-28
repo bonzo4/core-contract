@@ -66,6 +66,16 @@ describe("Team instructions", () => {
     program.programId
   );
 
+  const invoiceId = 7;
+  const [invoicePDA] = PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode("team_invoice"),
+      anchor.utils.bytes.utf8.encode(teamId.toString()),
+      anchor.utils.bytes.utf8.encode(invoiceId.toString()),
+    ],
+    program.programId
+  );
+
   it("init team", async () => {
     // Add your test here.
     const tx = await program.methods
@@ -267,5 +277,56 @@ describe("Team instructions", () => {
       teamMemberPDA
     );
     expect(teamMember).to.be.null;
+  });
+
+  it("creates team invoice", async () => {
+    await program.methods
+      .createTeamInvoice({
+        teamId: new anchor.BN(teamId),
+        invoiceId: new anchor.BN(invoiceId),
+        requestedAmount: new anchor.BN(1 * Math.pow(10, 6)),
+      })
+      .signers([ownerKeypair])
+      .accountsPartial({
+        signer: ownerKeypair.publicKey,
+        team: teamPDA,
+        invoice: invoicePDA,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const invoice = await program.account.teamInvoice.fetch(invoicePDA);
+    expect(
+      invoice.requestedAmount.div(new anchor.BN(10 ** 6)).toNumber()
+    ).to.equal(1);
+  });
+
+  it("pays invoice", async () => {
+    await program.methods
+      .payTeamInvoice({
+        teamId: new anchor.BN(teamId),
+        invoiceId: new anchor.BN(invoiceId),
+      })
+      .signers([userKeypair])
+      .accountsPartial({
+        signer: userKeypair.publicKey,
+        team: teamPDA,
+        invoice: invoicePDA,
+        usdcMint,
+        usdcPayerAccount: userUsdcAccount,
+      })
+      .rpc()
+      .catch((e) => {
+        console.log(e);
+      });
+
+    const invoice = await program.account.teamInvoice.fetch(invoicePDA);
+    expect(invoice.isPaid).to.equal(true);
+    const team = await program.account.team.fetch(teamPDA);
+    expect(
+      Number(BigInt(team.balance.div(new anchor.BN(10 ** 6)).toNumber()))
+    ).to.greaterThan(0);
   });
 });
