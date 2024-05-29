@@ -11,7 +11,7 @@ core_contract = "AhzB75bfztVnP2mnfTxdxtNrYmUy194XUxzYcJtzpWv5"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "https://mainnet.helius-rpc.com/?api-key=b774ff16-080c-4631-8f30-c4ace3a8e7c4"
 wallet = "./owner.json"
 
 [scripts]

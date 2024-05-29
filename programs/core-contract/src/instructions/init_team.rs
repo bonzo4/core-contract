@@ -48,7 +48,7 @@ pub struct InitTeam<'info> {
     pub user_vault: Account<'info, TokenAccount>,
     #[account(
         mut,
-        constraint=usdc_mint.key().to_string() == "BWikzMjEiqPASTPQ9Lz8aEtmsUnyR7bjD3WrmnZJgUYc"
+        constraint=usdc_mint.key().to_string() == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
     )]
     pub usdc_mint: Box<Account<'info, Mint>>,
     pub token_program: Program<'info, Token>,
