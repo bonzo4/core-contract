@@ -19,3 +19,4 @@ tests/user.ts                             # User Testing
 - Pay Users and Team Members
 - Install anchor, and solana to your system
 - Deploy to devnet via anchor deploy
+- Need to intialize USDC account before any user anything - can be changed in instructions at some point, isn't done on initialization of user unfortunately
